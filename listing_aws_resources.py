@@ -1,11 +1,12 @@
-from helpers import *  # Import helper functions, e.g., get_s3_client, list_buckets, describe_instances.
+"""Script to list some AWS resources using a helper file."""
+from helpers import *  # Import helper functions.
 import json
 from typing import List, Any
 
 
 def print_bucket_names(s3_client: Any) -> None:
     """
-    Retrieves and prints the names of all S3 buckets.
+    Retrieve and prints the names of all S3 buckets.
 
     Args:
         s3_client (Any): An AWS S3 client object for performing S3 operations.
@@ -15,7 +16,7 @@ def print_bucket_names(s3_client: Any) -> None:
     """
     # Use helper function to list all buckets associated with the S3 client.
     bucket_names = list_buckets(s3_client)
-    
+
     # Optional: Convert the bucket names to a JSON string for pretty printing.
     # pretty_bucket_names = json.dumps(bucket_names, indent=4)
     # print(pretty_bucket_names)
@@ -31,17 +32,17 @@ def print_bucket_names(s3_client: Any) -> None:
 
 def print_instance_ids(ec2_client: Any) -> None:
     """
-    Retrieves and prints the IDs of all EC2 instances.
+    Retrieve and prints the IDs of all EC2 instances.
 
     Args:
-        ec2_client (Any): An AWS EC2 client object for performing EC2 operations.
+        ec2_client (Any): An AWS EC2 client object.
 
     Returns:
         None
     """
     # Use helper function to describe instances associated with the EC2 client.
     instances = describe_instances(ec2_client)
-    
+
     # Initialize a list to store instance IDs.
     instance_ids: List[str] = []
 
