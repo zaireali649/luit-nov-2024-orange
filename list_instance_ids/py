@@ -1,22 +1,40 @@
 import boto3
+from typing import List
 
-def list_instance_ids(ec2_client):
+def list_instance_ids(ec2_client: boto3.client) -> List[str]:
+    """
+    Retrieve a list of all EC2 instance IDs in the account.
+
+    Args:
+        ec2_client (boto3.client): A boto3 EC2 client instance.
+
+    Returns:
+        List[str]: A list of EC2 instance IDs.
+    """
+    # Describe all EC2 instances and get the response
     response = ec2_client.describe_instances()
     
+    # Extract the reservations from the response
     reservations = response["Reservations"]
     
-    instanceIds = []
+    # Initialize an empty list to store instance IDs
+    instance_ids = []
     
+    # Loop through each reservation to extract instances
     for reservation in reservations:
-        instances = reservation["Instances"]
+        instances = reservation["Instances"]  # Get the list of instances in the reservation
         for instance in instances:
-            instanceId = instance["InstanceId"]
-            
-            instanceIds.append(instanceId)
+            instance_id = instance["InstanceId"]  # Extract the instance ID
+            instance_ids.append(instance_id)     # Add the instance ID to the list
     
-    return instanceIds
-            
+    return instance_ids
+
 if __name__ == "__main__":
+    # Create a boto3 EC2 client
     ec2 = boto3.client('ec2')
-    instanceIds = list_instance_ids(ec2)
-    print('\n'.join(instanceIds))
+    
+    # Call the function to list all EC2 instance IDs
+    instance_ids = list_instance_ids(ec2)
+    
+    # Print the instance IDs, one per line
+    print('\n'.join(instance_ids))
