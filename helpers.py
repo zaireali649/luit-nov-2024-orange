@@ -1,90 +1,115 @@
-from typing import Any
+import boto3  # Import the Boto3 library to interact with AWS services
 
-def create_ubuntu_instance(ec2_client: Any) -> int:
+def get_ec2_client() -> boto3.client:
     """
-    Creates an EC2 instance using the Ubuntu AMI.
+    Creates and returns an EC2 client using Boto3.
+
+    Returns:
+        boto3.client: The EC2 client.
+    """
+    return boto3.client('ec2')
+
+def get_s3_client() -> boto3.client:
+    """
+    Creates and returns an S3 client using Boto3.
+
+    Returns:
+        boto3.client: The S3 client.
+    """
+    return boto3.client('s3')
+
+def describe_instances(client: boto3.client) -> list:
+    """
+    Describes EC2 instances and returns a list of instances.
 
     Args:
-        ec2_client (Any): An EC2 client object used to interact with AWS EC2.
+        client (boto3.client): The EC2 client used to describe instances.
 
     Returns:
-        int: A placeholder return value (0 for now).
+        list: A list of instances.
     """
-    # Placeholder logic for creating an Ubuntu instance.
-    return 0
+    response = client.describe_instances()  # Call the describe_instances method to get information about EC2 instances
+    instances = []
+    for reservation in response['Reservations']:  # Iterate over each reservation in the response
+        instances.extend(reservation['Instances'])  # Extend the instances list with instances from the reservation
+    return instances
 
-def create_amazon_linux_2023_instance(ec2_client: Any) -> int:
+def create_ubuntu_instance(client: boto3.client) -> None:
     """
-    Creates an EC2 instance using the Amazon Linux 2023 AMI.
+    Creates an Ubuntu EC2 instance.
 
     Args:
-        ec2_client (Any): An EC2 client object used to interact with AWS EC2.
+        client (boto3.client): The EC2 client used to create the instance.
 
     Returns:
-        int: A placeholder return value (0 for now).
+        None
     """
-    # Placeholder logic for creating an Amazon Linux 2023 instance.
-    return 0
+    create_instance(client, "ami-04b70fa74e45c3917")  # Call create_instance with the Ubuntu AMI ID
 
-def create_amazon_linux_2_instance(ec2_client: Any) -> int:
+def create_amazon_linux_2023_instance(client: boto3.client) -> None:
     """
-    Creates an EC2 instance using the Amazon Linux 2 AMI.
+    Creates an Amazon Linux 2023 EC2 instance.
 
     Args:
-        ec2_client (Any): An EC2 client object used to interact with AWS EC2.
+        client (boto3.client): The EC2 client used to create the instance.
 
     Returns:
-        int: A placeholder return value (0 for now).
+        None
     """
-    # Placeholder logic for creating an Amazon Linux 2 instance.
-    return 0
+    create_instance(client, "ami-08a0d1e16fc3f61ea")  # Call create_instance with the Amazon Linux 2023 AMI ID
 
-def get_ec2_client() -> int:
+def create_amazon_linux_2_instance(client: boto3.client) -> None:
     """
-    Retrieves an EC2 client object for interacting with AWS EC2.
-
-    Returns:
-        int: A placeholder return value (0 for now).
-    """
-    # Placeholder logic for returning an EC2 client.
-    return 0
-
-def get_s3_client() -> int:
-    """
-    Retrieves an S3 client object for interacting with AWS S3.
-
-    Returns:
-        int: A placeholder return value (0 for now).
-    """
-    # Placeholder logic for returning an S3 client.
-    return 0
-
-def list_buckets(s3_client: Any) -> int:
-    """
-    Lists all S3 buckets using the provided S3 client.
+    Creates an Amazon Linux 2 EC2 instance.
 
     Args:
-        s3_client (Any): An AWS S3 client object for performing S3 operations.
+        client (boto3.client): The EC2 client used to create the instance.
 
     Returns:
-        int: A placeholder return value (0 for now).
+        None
     """
-    # TODO: Implement logic to list buckets using s3_client.
-    # Example: s3_client.list_buckets()
-    return 0
+    create_instance(client, "ami-0eaf7c3456e7b5b68")  # Call create_instance with the Amazon Linux 2 AMI ID
 
-
-def describe_instances(s3_client: Any) -> int:
+def create_instance(client: boto3.client, ami: str) -> None:
     """
-    Placeholder function to describe instances using the provided S3 client.
-    Note: The naming suggests EC2-related functionality, which may require
-    a different AWS client such as EC2.
+    Creates an EC2 instance with the specified AMI.
 
     Args:
-        s3_client (Any): An AWS S3 client object (may be an incorrect client type).
+        client (boto3.client): The EC2 client used to create the instance.
+        ami (str): The AMI ID to use for the instance.
 
     Returns:
-        int: A placeholder return value (0 for now).
+        None
     """
-    # TODO: Verify the intended functionality and correct the client type if necessary.
-    return 0
+    keyName = 'private-ec2'  # Key pair name for the instance
+    client.run_instances(MaxCount=1,
+                         MinCount=1,
+                         ImageId=ami,
+                         InstanceType="t2.micro",
+                         KeyName=keyName,
+                         SecurityGroupIds=['sg-0197b8159a5d886f8'])  # Run the instance with specified parameters
+
+def list_buckets(s3_client: boto3.client) -> list:
+    """
+    Lists the names of all S3 buckets.
+
+    Args:
+        s3_client (boto3.client): The S3 client used to list buckets.
+
+    Returns:
+        list: A list of bucket names.
+    """
+    response = s3_client.list_buckets()  # Call the list_buckets method to get information about S3 buckets
+    return [bucket['Name'] for bucket in response['Buckets']]  # Extract and return the list of bucket names
+
+if __name__ == '__main__':
+    ec2_client = get_ec2_client()  # Get the EC2 client
+    # Uncomment the lines below to create instances
+    #create_ubuntu_instance(ec2_client)
+    #create_amazon_linux_2023_instance(ec2_client)
+    #create_amazon_linux_2_instance(ec2_client)
+
+    s3_client = get_s3_client()  # Get the S3 client
+    response = s3_client.list_buckets()  # List the S3 buckets
+
+    print(response)  # Print the response containing bucket information
